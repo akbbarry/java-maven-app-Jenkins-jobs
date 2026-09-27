@@ -87,14 +87,20 @@ pipeline {
 
         stage('deploy') {
             environment {
-                AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
-                AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
                 AWS_DEFAULT_REGION = 'us-east-2'
             }
+
             steps {
-                script {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
                     sh '''
                         export AWS_PAGER=""
+
+                        aws sts get-caller-identity
 
                         aws eks update-kubeconfig \
                         --region us-east-2 \
