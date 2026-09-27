@@ -36,8 +36,8 @@ pipeline {
         stage('build image') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'jenkins_aws_access_key_id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'jenkins-aws_secret_access_key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials']
                     ]) {
                         script {
                         sh """
