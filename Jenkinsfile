@@ -88,22 +88,22 @@ pipeline {
                 AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
                 AWS_DEFAULT_REGION = 'us-east-2'
             }
-        }
-        steps {
-            script {
-                sh '''
-                export AWS_PAGER=""
+            steps {
+                script {
+                    sh '''
+                        export AWS_PAGER=""
 
-                aws eks update-kubeconfig \
-                --region us-east-2 \
-                --name demo-cluster
+                        aws eks update-kubeconfig \
+                        --region us-east-2 \
+                        --name demo-cluster
 
-                envsubst < Kubernetes/deployment.yaml | kubectl apply -f -
-                envsubst < Kubernetes/service.yaml | kubectl apply -f -
-                '''
+                        envsubst < Kubernetes/deployment.yaml | kubectl apply -f -
+                        envsubst < Kubernetes/service.yaml | kubectl apply -f -
+                    '''
+                }
             }
         }
-
+        
         stage('configure with Ansible') {
             steps {
                 script {
