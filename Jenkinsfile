@@ -11,6 +11,7 @@ pipeline {
         ECR_REGISTRY = "637739132640.dkr.ecr.us-east-2.amazonaws.com"
         ECR_REPOSITORY = "java-maven-app"
         APP_NAME = "java-maven-app"
+        ANSIBLE_SERVER = "YOUR_ANSIBLE_SERVER_IP"
     }
     stages {
         stage('increment version') {
@@ -52,28 +53,82 @@ pipeline {
                 }
             }
         }
-        stage('deploy') {
-    environment {
-        AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
-        AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
-        AWS_DEFAULT_REGION = 'us-east-2'
-    }
 
-    steps {
-        script {
-            sh '''
-            export AWS_PAGER=""
+        stage('Ansible') {
+            steps {
+                script {
+                    def remote = [:]
 
-            aws eks update-kubeconfig \
-              --region us-east-2 \
-              --name demo-cluster
+                    remote.name = 'ansible-server'
+                    remote.host = env.ANSIBLE_SERVER
+                    remote.user = 'ec2-user'
+                    remote.allowAnyHosts = true
 
-            envsubst < Kubernetes/deployment.yaml | kubectl apply -f -
-            envsubst < Kubernetes/service.yaml | kubectl apply -f -
-            '''
+                    sshCommand remote: remote, command: 'mkdir -p ~/ansible-projects'
+
+                    sshPut remote: remote,
+                        from: '../ansible-projects-main',
+                        into: '~/ansible-projects'
+
+                    sshCommand remote: remote,
+                        command: 'chmod +x ~/ansible-projects/prepare-ansible-server.sh'
+
+                    sshCommand remote: remote,
+                        command: '~/ansible-projects/prepare-ansible-server.sh'
+
+                    sshCommand remote: remote,
+                        command: 'ansible-playbook ~/ansible-projects/my-playbook.yaml'
+                }
+            }
         }
-    }
-}
+
+        stage('deploy') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
+                AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
+                AWS_DEFAULT_REGION = 'us-east-2'
+            }
+        }
+        steps {
+            script {
+                sh '''
+                export AWS_PAGER=""
+
+                aws eks update-kubeconfig \
+                --region us-east-2 \
+                --name demo-cluster
+
+                envsubst < Kubernetes/deployment.yaml | kubectl apply -f -
+                envsubst < Kubernetes/service.yaml | kubectl apply -f -
+                '''
+            }
+        }
+
+        stage('configure with Ansible') {
+            steps {
+                script {
+                    def remote = [:]
+                    remote.name = 'ansible-server'
+                    remote.host = ANSIBLE_SERVER
+                    remote.allowAnyHosts = true
+
+                    sshagent(['ansible-server-key']) {
+                        sh '''
+                            scp -o StrictHostKeyChecking=no -r ansible-projects/* \
+                            ec2-user@$ANSIBLE_SERVER:/home/ec2-user/ansible-projects/
+                        '''
+                    }
+
+                    sshCommand remote: remote, command: '''
+                        cd /home/ec2-user/ansible-projects
+                        chmod +x prepare-ansible-server.sh
+                        ./prepare-ansible-server.sh
+                        ansible-playbook -i inventory_aws_ec2.yaml my-playbook.yaml
+                    '''
+                }
+            }
+        }
+
         stage('commit version update'){
             steps {
                 script {
@@ -85,6 +140,7 @@ pipeline {
                         sh 'git diff --cached --quiet || git commit -m "ci: version bump"'
                         sh "git push origin Jenkins-jobs"
                     }
+
                 }
             }
         }
