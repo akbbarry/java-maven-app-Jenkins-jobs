@@ -18,12 +18,17 @@ This project uses Jenkins to build and deploy the Java Maven application.
 4. **Docker Push**
    - Pushes the Docker image to the container registry.
 
-5. **Deploy**
+5. **Ansible**
+   - Copies the Ansible project to the Ansible server.
+   - Prepares the Ansible server.
+   - Runs the Ansible playbook.
+
+6. **Deploy**
    - Updates the kubeconfig for the AWS EKS cluster.
    - Deploys the Kubernetes Deployment.
    - Deploys the Kubernetes Service.
 
-6. **Commit Version Update**
+7. **Commit Version Update**
    - Updates the application version and pushes the change back to GitLab.
 
 ## Kubernetes Verification
