@@ -104,32 +104,6 @@ pipeline {
                 }
             }      
 
-        
-        stage('configure with Ansible') {
-            steps {
-                script {
-                    def remote = [:]
-                    remote.name = 'ansible-server'
-                    remote.host = ANSIBLE_SERVER
-                    remote.allowAnyHosts = true
-
-                    sshagent(['ansible-server-key']) {
-                        sh '''
-                            scp -o StrictHostKeyChecking=no -r ansible-projects/* \
-                            ec2-user@$ANSIBLE_SERVER:/home/ec2-user/ansible-projects/
-                        '''
-                    }
-
-                    sshCommand remote: remote, command: '''
-                        cd /home/ec2-user/ansible-projects
-                        chmod +x prepare-ansible-server.sh
-                        ./prepare-ansible-server.sh
-                        ansible-playbook -i inventory_aws_ec2.yaml my-playbook.yaml
-                    '''
-                }
-            }
-        }
-
         stage('commit version update'){
             steps {
                 script {
