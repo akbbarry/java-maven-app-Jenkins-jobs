@@ -115,7 +115,9 @@ pipeline {
                             git remote set-url origin https://$USER:$PASS@github.com/akbbarry/java-maven-app-Jenkins-jobs.git
                             git fetch origin
                             git checkout -B main origin/main
-                            git add .
+                            git config user.name "$USER"
+                            git config user.email "$USER@users.noreply.github.com"
+                            git add pom.xml
                             git diff --cached --quiet || git commit -m "ci: version bump"
                             git push origin main
                         '''
