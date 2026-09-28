@@ -60,13 +60,18 @@ pipeline {
         stage('Ansible') {
             steps {
                 script {
-                    def remote = [:]
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: 'aws-ssh-key',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )]) {
+                        def remote = [:]
 
-                    remote.name = 'ansible-server'
-                    remote.host = env.ANSIBLE_SERVER
-                    remote.user = 'ec2-user'
-                    remote.allowAnyHosts = true
-
+                        remote.name = 'ansible-server'
+                        remote.host = env.ANSIBLE_SERVER
+                        remote.user = SSH_USER
+                        remote.identityFile = SSH_KEY
+                        remote.allowAnyHosts = true
                     sshCommand remote: remote, command: 'mkdir -p ~/ansible-projects'
 
                     sshPut remote: remote,
@@ -81,9 +86,10 @@ pipeline {
 
                     sshCommand remote: remote,
                         command: 'ansible-playbook ~/ansible-projects/my-playbook.yaml'
+                    }
                 }
             }
-        }
+        }    
 
         stage('deploy') {
             environment {
