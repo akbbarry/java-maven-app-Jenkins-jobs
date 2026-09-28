@@ -11,7 +11,7 @@ pipeline {
         ECR_REGISTRY = "333968387482.dkr.ecr.us-east-2.amazonaws.com"
         ECR_REPOSITORY = "java-maven-app"
         APP_NAME = "java-maven-app"
-        ANSIBLE_SERVER = "YOUR_ANSIBLE_SERVER_IP"
+        ANSIBLE_SERVER = "18.220.218.77"
     }
     stages {
         stage('increment version') {
