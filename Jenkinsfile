@@ -61,10 +61,10 @@ pipeline {
             steps {
                 script {
                     withCredentials([sshUserPrivateKey(
-                        credentialsId: 'aws-ssh-key',
+                        credentialsId: 'ansible-server-key',
                         keyFileVariable: 'SSH_KEY',
                         usernameVariable: 'SSH_USER'
-                    )]) {
+                    )]){
                         def remote = [:]
 
                         remote.name = 'ansible-server'
@@ -72,24 +72,30 @@ pipeline {
                         remote.user = SSH_USER
                         remote.identityFile = SSH_KEY
                         remote.allowAnyHosts = true
-                    sshCommand remote: remote, command: 'mkdir -p ~/ansible-projects'
 
-                    sshPut remote: remote,
-                        from: '../ansible-projects-main',
-                        into: '~/ansible-projects'
+                        sshCommand remote: remote, command: 'mkdir -p ~/ansible-projects'
 
-                    sshCommand remote: remote,
-                        command: 'chmod +x ~/ansible-projects/prepare-ansible-server.sh'
+                        dir('ansible-projects') {
+                            git branch: 'main',
+                                url: 'https://github.com/akbbarry/ansible-projects.git'
+                        }
 
-                    sshCommand remote: remote,
-                        command: '~/ansible-projects/prepare-ansible-server.sh'
+                        sshPut remote: remote,
+                            from: 'ansible-projects',
+                            into: '/home/ec2-user/'
 
-                    sshCommand remote: remote,
-                        command: 'ansible-playbook ~/ansible-projects/my-playbook.yaml'
+                        sshCommand remote: remote,
+                                command: 'chmod +x ~/ansible-projects/prepare-ansible-server.sh'
+
+                        sshCommand remote: remote,
+                                command: '~/ansible-projects/prepare-ansible-server.sh'
+
+                        sshCommand remote: remote,
+                                command: 'cd ~/ansible-projects && ansible-playbook my-playbook.yaml'
+                        }
                     }
                 }
-            }
-        }    
+            }      
 
         stage('deploy') {
             environment {
