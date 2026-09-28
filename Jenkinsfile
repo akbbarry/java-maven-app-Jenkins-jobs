@@ -84,6 +84,13 @@ pipeline {
                             from: 'ansible-projects',
                             into: '/home/ec2-user/'
 
+                        sshPut remote: remote,
+                            from: SSH_KEY,
+                            into: '/home/ec2-user/target-key.pem'
+
+                        sshCommand remote: remote,
+                                command: 'chmod 600 /home/ec2-user/target-key.pem && sed -i "s|/root/ssh-key.pem|/home/ec2-user/target-key.pem|" ~/ansible-projects/ansible.cfg'
+
                         sshCommand remote: remote,
                                 command: 'chmod +x ~/ansible-projects/prepare-ansible-server.sh'
 
