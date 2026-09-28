@@ -107,13 +107,13 @@ pipeline {
         stage('commit version update'){
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'gitlab-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-                        git remote set-url origin https://$USER:$PASS@gitlab.com/Alkerix/java-maven-app.git
+                    withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                        git remote set-url origin https://$USER:$PASS@github.com/akbbarry/java-maven-app-Jenkins-jobs.git
                         sh 'git fetch origin'
-                        sh 'git checkout -B Jenkins-jobs origin/Jenkins-jobs'
+                        sh 'git checkout -B main origin/main
                         sh 'git add .'
                         sh 'git diff --cached --quiet || git commit -m "ci: version bump"'
-                        sh "git push origin Jenkins-jobs"
+                        sh "git push origin main"
                     }
 
                 }
