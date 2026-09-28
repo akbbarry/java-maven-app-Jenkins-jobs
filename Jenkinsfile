@@ -8,7 +8,7 @@ pipeline {
         maven 'maven-3.9'
     }
     environment {
-        ECR_REGISTRY = "637739132640.dkr.ecr.us-east-2.amazonaws.com"
+        ECR_REGISTRY = "333968387482.dkr.ecr.us-east-2.amazonaws.com"
         ECR_REPOSITORY = "java-maven-app"
         APP_NAME = "java-maven-app"
         ANSIBLE_SERVER = "YOUR_ANSIBLE_SERVER_IP"
