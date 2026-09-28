@@ -104,33 +104,6 @@ pipeline {
                 }
             }      
 
-        stage('deploy') {
-            environment {
-                AWS_DEFAULT_REGION = 'us-east-2'
-            }
-
-            steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials',
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]]) {
-                    sh '''
-                        export AWS_PAGER=""
-
-                        aws sts get-caller-identity
-
-                        aws eks update-kubeconfig \
-                        --region us-east-2 \
-                        --name demo-cluster
-
-                        envsubst < Kubernetes/deployment.yaml | kubectl apply -f -
-                        envsubst < Kubernetes/service.yaml | kubectl apply -f -
-                    '''
-                }
-            }
-        }
         
         stage('configure with Ansible') {
             steps {
