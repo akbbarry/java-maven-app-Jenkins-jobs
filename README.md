@@ -45,7 +45,7 @@ kubectl get pods
 kubectl get svc   - Deploys the Kubernetes Service.
 
 7. **Commit Version Update**
-   - Updates the application version and pushes the change back to GitLab.
+   - Updates the application version and pushes the change back to GitHub.
 
 ## Kubernetes Verification
 
@@ -54,7 +54,7 @@ After deployment, verify the application with:
 ```bash
 kubectl get pods
 kubectl get svc
-
+` ``` `
 The application service can then be accessed using the external endpoint provided by Kubernetes.
 
 Technologies Used
