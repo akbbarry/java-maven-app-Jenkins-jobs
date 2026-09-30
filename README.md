@@ -50,7 +50,7 @@ kubectl get svc   - Deploys the Kubernetes Service.
 
 After deployment, verify the application with:
 
-
+```bash
 kubectl get pods
 kubectl get svc
 
