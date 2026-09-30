@@ -40,7 +40,6 @@ The Jenkins pipeline automates the following stages:
 
 After deployment, the Kubernetes resources can be verified with:
 
-```bash
 kubectl get pods
 kubectl get svc   - Deploys the Kubernetes Service.
 
@@ -51,10 +50,10 @@ kubectl get svc   - Deploys the Kubernetes Service.
 
 After deployment, verify the application with:
 
-```bash
+
 kubectl get pods
 kubectl get svc
-` ``` `
+
 The application service can then be accessed using the external endpoint provided by Kubernetes.
 
 Technologies Used
@@ -72,3 +71,4 @@ AWS CLI
 Purpose
 
 This project demonstrates an end-to-end CI/CD pipeline using Jenkins to automate application building, containerization, image publishing, server configuration with Ansible, Kubernetes deployment, and version management.
+``````
