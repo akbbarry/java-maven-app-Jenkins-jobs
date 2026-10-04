@@ -57,6 +57,25 @@ pipeline {
             }
         }
 
+        stage('Deploy') {
+            steps {
+                script {
+                    sh '''
+                        export AWS_PAGER=""
+
+                        aws sts get-caller-identity
+
+                        aws eks update-kubeconfig \
+                            --region us-east-2 \
+                            --name demo-cluster
+
+                        envsubst < Kubernetes/deployment.yaml | kubectl apply -f -
+                        envsubst < Kubernetes/service.yaml | kubectl apply -f -
+                    '''
+                }
+            }
+        }
+
         stage('Ansible') {
             steps {
                 script {
